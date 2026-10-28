@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from perceptron!")
+"""Perceptron lab: a hand-written single-layer perceptron."""

@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.scripts]
-perceptron = "perceptron:main"
+perceptron = "perceptron.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.13.6,<0.14.0"]
@@ -26,3 +26,24 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.17.3",
 ]
+
+[tool.ruff]
+line-length = 88
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+strict = true
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["sklearn.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
