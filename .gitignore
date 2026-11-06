@@ -11,3 +11,5 @@ wheels/
 
 # PyCharm
 .idea/
+
+try_plots.py
