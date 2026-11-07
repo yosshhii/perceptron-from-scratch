@@ -3,10 +3,12 @@
 import argparse
 
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 from perceptron.data import generate_two_clusters, load_iris_binary
 from perceptron.model import FloatArray, IntArray, Perceptron
 from perceptron.plots import plot_decision_boundary, plot_errors
+from pathlib import Path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -42,6 +44,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="dataset to train on",
     )
     parser.add_argument("--plot", action="store_true", help="show plots")
+    parser.add_argument("--save-dir", type=Path, help="directory to save plots as PNG")
 
     return parser
 
@@ -83,17 +86,41 @@ def train_model(
     return model, errors
 
 
-def show_plots(
+# def show_plots(
+#     model: Perceptron, errors: list[int], X: FloatArray, y: IntArray
+# ) -> None:
+#     """Show the decision boundary and the training error curve."""
+#     plot_errors(errors)
+#     if X.shape[1] == 2 and model.n_features == 2:
+#         plot_decision_boundary(model=model, X=X, y=y)
+#     else:
+#         print("Decision boundary is only available for 2 features")
+#
+#     plt.show()
+
+
+def make_figures(
     model: Perceptron, errors: list[int], X: FloatArray, y: IntArray
-) -> None:
-    """Show the decision boundary and the training error curve."""
-    plot_errors(errors)
+) -> dict[str, Figure]:
+    """Build plots and return them keyed by file name."""
+    figures = {"errors": plot_errors(errors)}
     if X.shape[1] == 2 and model.n_features == 2:
-        plot_decision_boundary(model=model, X=X, y=y)
+        figures["boundary"] = plot_decision_boundary(model=model, X=X, y=y)
     else:
         print("Decision boundary is only available for 2 features")
 
-    plt.show()
+    return figures
+
+
+def save_figures(figures: dict[str, Figure], save_dir: Path) -> None:
+    """Save figures as PNG files into save_dir."""
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    for name, fig in figures.items():
+        filename = f"{name}.png"
+        file_path = save_dir / filename
+
+        fig.savefig(file_path, bbox_inches="tight")
 
 
 def print_report(
@@ -122,5 +149,13 @@ def main(argv: list[str] | None = None) -> None:
     model, errors = train_model(args, X, y)
     print_report(args, model, errors, X, y)
 
-    if args.plot:
-        show_plots(model, errors, X, y)
+    if args.plot or args.save_dir:
+        figures = make_figures(model, errors, X, y)
+
+        if args.save_dir:
+            save_figures(figures, args.save_dir)
+            print(f"Saved plots to {args.save_dir}")
+
+        if args.plot:
+            plt.show()
+

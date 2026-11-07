@@ -12,4 +12,7 @@ wheels/
 # PyCharm
 .idea/
 
+# Plots
+*.png
+!docs/*.png
 try_plots.py

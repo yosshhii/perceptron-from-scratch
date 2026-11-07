@@ -41,8 +41,8 @@ def plot_decision_boundary(
     ax.scatter(X[y == 0, 0], X[y == 0, 1], label="class 0")
     ax.scatter(X[y == 1, 0], X[y == 1, 1], label="class 1")
 
-    ax.set_xlabel("x1")
-    ax.set_ylabel("x2")
+    ax.set_xlabel("x1", color="gray")
+    ax.set_ylabel("x2", color="gray")
     ax.set_title(title)
 
     xlim = ax.get_xlim()
