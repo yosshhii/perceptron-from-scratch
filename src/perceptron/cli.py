@@ -18,6 +18,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--samples", type=int, default=200, help="number of points (clusters only)"
     )
+    parser.add_argument(
+        "--offset",
+        type=float,
+        default=5.0,
+        help="cluster center offset (clusters only)",
+    )
+    parser.add_argument(
+        "--spread",
+        type=float,
+        default=1.0,
+        help="cluster standard deviation (clusters only)",
+    )
     parser.add_argument("--lr", type=float, default=0.1, help="learning rate")
     parser.add_argument(
         "--epochs", type=int, default=50, help="number of training epochs"
@@ -39,6 +51,9 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> 
     if args.samples < 2:
         parser.error("--samples must be at least 2")
 
+    if args.spread < 0:
+        parser.error("--spread must be non-negative")
+
     if args.lr <= 0:
         parser.error("--lr must be positive")
 
@@ -49,7 +64,12 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> 
 def load_data(args: argparse.Namespace) -> tuple[FloatArray, IntArray]:
     """Generate clusters or load Iris depending on --dataset."""
     if args.dataset == "clusters":
-        return generate_two_clusters(n_samples=args.samples, seed=args.seed)
+        return generate_two_clusters(
+            n_samples=args.samples,
+            seed=args.seed,
+            offset=args.offset,
+            spread=args.spread,
+        )
     return load_iris_binary()
 
 
