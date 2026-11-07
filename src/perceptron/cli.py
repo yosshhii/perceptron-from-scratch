@@ -22,7 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--epochs", type=int, default=50, help="number of training epochs"
     )
-    parser.add_argument("--seed", type=int, default=50, help="seed for reproducibility")
+    parser.add_argument("--seed", type=int, default=0, help="seed for reproducibility")
     parser.add_argument(
         "--dataset",
         choices=["clusters", "iris"],
