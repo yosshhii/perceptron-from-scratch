@@ -8,8 +8,8 @@ It trains on synthetic 2D clusters or on the Iris dataset, prints its accuracy,
 and plots the decision boundary and the training error curve.
 
 <p align="center">
-  <img src="docs/boundary_clusters.png" width="45%" alt="Decision boundary">
-  <img src="docs/errors_clusters.png" width="45%" alt="Training errors">
+  <img src="docs/boundary_clusters.png" width="49%" alt="Decision boundary">
+  <img src="docs/errors_clusters.png" width="49%" alt="Training errors">
 </p>
 
 ## Features
@@ -18,8 +18,9 @@ and plots the decision boundary and the training error curve.
   `w += lr · (target − pred) · x`, and early stopping once an epoch has no errors.
 - **Synthetic data.** Two Gaussian clusters around different centers,
   reproducible via `--seed`.
-- **Real data.** Iris: setosa vs. the other species, using petal length and width.
+- **Real data.** Iris: setosa vs. the other species, using petal length and width. 
 - **Visualization.** Decision boundary over class-colored samples and errors per epoch.
+  Plots can be shown interactively or saved as PNG files.
 - **Simple CLI.** One command to run, clear error messages instead of tracebacks.
 - **Code quality.** Type hints, `ruff`, `mypy --strict`, `pytest` tests, and CI on GitHub Actions.
 
@@ -76,9 +77,11 @@ Accuracy: 1.000
 More examples:
 
 ```bash
-uv run perceptron --plot                   # show plots
-uv run perceptron --dataset iris --plot    # train on Iris
-uv run perceptron --help                   # list all options
+uv run perceptron --plot                     # show plots
+uv run perceptron --dataset iris --plot      # train on Iris
+uv run perceptron --save-dir docs/           # save plots as PNG files
+uv run perceptron --offset 3.0 --spread 1.5  # generate harder clusters
+uv run perceptron --help                     # list all options
 ```
 
 You can also run the package as a module: `uv run python -m perceptron ...`
@@ -88,11 +91,14 @@ You can also run the package as a module: `uv run python -m perceptron ...`
 | Option | Default | Description |
 |---|---|---|
 | `--samples` | `200` | number of points (`clusters` only) |
+| `--offset` | `5.0` | cluster center offset (`clusters` only) |
+| `--spread` | `1.0` | cluster standard deviation (`clusters` only) |
 | `--lr` | `0.1` | learning rate, must be positive |
 | `--epochs` | `50` | maximum number of epochs, at least 1 |
 | `--seed` | `0` | random seed for data generation |
 | `--dataset` | `clusters` | `clusters` or `iris` |
 | `--plot` | off | show plots after training |
+| `--save-dir` | None | directory to save plots as PNG |
 
 ## Iris
 
@@ -102,7 +108,7 @@ setosa is linearly separable on them, and the boundary can be drawn on a plane.
 Training converges in 3 epochs with an accuracy of 1.0.
 
 <p align="center">
-  <img src="docs/boundary_iris.png" width="60%" alt="Iris decision boundary">
+  <img src="docs/boundary_iris.png" width="65%" alt="Iris decision boundary">
 </p>
 
 ## Project structure
