@@ -1,6 +1,7 @@
 """Command-line interface for training the perceptron."""
 
 import argparse
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
@@ -8,7 +9,6 @@ from matplotlib.figure import Figure
 from perceptron.data import generate_two_clusters, load_iris_binary
 from perceptron.model import FloatArray, IntArray, Perceptron
 from perceptron.plots import plot_decision_boundary, plot_errors
-from pathlib import Path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -158,4 +158,3 @@ def main(argv: list[str] | None = None) -> None:
 
         if args.plot:
             plt.show()
-
