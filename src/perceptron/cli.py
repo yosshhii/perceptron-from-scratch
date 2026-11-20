@@ -6,7 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
-from perceptron.data import generate_two_clusters, load_iris_binary
+from perceptron.data import generate_two_clusters, load_iris_binary, train_test_split
 from perceptron.model import FloatArray, IntArray, Perceptron
 from perceptron.plots import plot_decision_boundary, plot_errors
 
@@ -36,6 +36,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--epochs", type=int, default=50, help="number of training epochs"
     )
+    parser.add_argument(
+        "--test-size",
+        type=float,
+        default=0.2,
+        help="fraction of samples assigned to the test set (default: %(default)s)",
+    )
     parser.add_argument("--seed", type=int, default=0, help="seed for reproducibility")
     parser.add_argument(
         "--dataset",
@@ -63,6 +69,9 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> 
     if args.epochs < 1:
         parser.error("--epochs must be at least 1")
 
+    if not 0 < args.test_size < 1:
+        parser.error("--test-size must be strictly between 0 and 1")
+
 
 def load_data(args: argparse.Namespace) -> tuple[FloatArray, IntArray]:
     """Generate clusters or load Iris depending on --dataset."""
@@ -74,6 +83,13 @@ def load_data(args: argparse.Namespace) -> tuple[FloatArray, IntArray]:
             spread=args.spread,
         )
     return load_iris_binary()
+
+
+def split_data(
+    args: argparse.Namespace, X: FloatArray, y: IntArray
+) -> tuple[FloatArray, FloatArray, IntArray, IntArray]:
+    """Split the dataset into training and test sets using CLI options."""
+    return train_test_split(X, y, test_size=args.test_size, seed=args.seed)
 
 
 def train_model(
@@ -105,7 +121,9 @@ def make_figures(
     """Build plots and return them keyed by file name."""
     figures = {"errors": plot_errors(errors)}
     if X.shape[1] == 2 and model.n_features == 2:
-        figures["boundary"] = plot_decision_boundary(model=model, X=X, y=y)
+        figures["boundary"] = plot_decision_boundary(
+            model=model, X=X, y=y, title="Decision boundary on the test set"
+        )
     else:
         print("Decision boundary is only available for 2 features")
 
@@ -131,12 +149,12 @@ def print_report(
     y: IntArray,
 ) -> None:
     """Print dataset info, training summary and accuracy."""
-    print(f"Dataset: {args.dataset} ({X.shape[0]} samples, {X.shape[1]} features)")
+    print(f"Test set: {args.dataset} ({X.shape[0]} samples, {X.shape[1]} features)")
     status = "converged" if errors[-1] == 0 else "not converged"
     epoch_word = "epoch" if len(errors) == 1 else "epochs"
     print(f"Training: {len(errors)} {epoch_word}, {status}")
     accuracy = model.score(X, y)
-    print(f"Accuracy: {accuracy:.3f}")
+    print(f"Test accuracy: {accuracy:.3f}")
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -146,11 +164,15 @@ def main(argv: list[str] | None = None) -> None:
     validate_args(parser, args)
 
     X, y = load_data(args)
-    model, errors = train_model(args, X, y)
-    print_report(args, model, errors, X, y)
+    try:
+        X_train, X_test, y_train, y_test = split_data(args, X, y)
+    except ValueError as exc:
+        parser.error(str(exc))
+    model, errors = train_model(args, X_train, y_train)
+    print_report(args, model, errors, X_test, y_test)
 
     if args.plot or args.save_dir:
-        figures = make_figures(model, errors, X, y)
+        figures = make_figures(model, errors, X_test, y_test)
 
         if args.save_dir:
             save_figures(figures, args.save_dir)

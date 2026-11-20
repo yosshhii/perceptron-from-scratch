@@ -1,5 +1,7 @@
 """Synthetic dataset generation and Iris loading."""
 
+import math
+
 import numpy as np
 from sklearn.datasets import load_iris
 
@@ -77,3 +79,53 @@ def load_iris_binary() -> tuple[FloatArray, IntArray]:
     target = np.asarray(iris.target == 0, dtype=np.int_)
 
     return dataset, target
+
+
+def train_test_split(
+    X: FloatArray, y: IntArray, test_size: float = 0.2, seed: None | int = None
+) -> tuple[FloatArray, FloatArray, IntArray, IntArray]:
+    """Randomly split features and labels into training and test sets.
+
+    Args:
+        X: Feature matrix of shape (n_samples, n_features).
+        y: Label array of shape (n_samples,).
+        test_size: Fraction of samples assigned to the test set. The resulting
+            test count is rounded up to the next integer if needed.
+        seed: Random seed for reproducibility. If None, the split can vary
+            between calls.
+
+    Returns:
+        A tuple (X_train, X_test, y_train, y_test).
+
+    Raises:
+        ValueError: If X or y has the wrong number of dimensions, their sample
+            counts differ, test_size is outside the open interval (0, 1), or
+            the split leaves no training samples.
+    """
+    if X.ndim != 2:
+        raise ValueError("X must be a two-dimensional array")
+
+    if y.ndim != 1:
+        raise ValueError("y must be a one-dimensional array")
+
+    if X.shape[0] != y.shape[0]:
+        raise ValueError("X and y must contain the same number of samples")
+
+    if not 0 < test_size < 1:
+        raise ValueError("test_size must be strictly between 0 and 1")
+
+    n_samples = X.shape[0]
+    n_test = math.ceil(n_samples * test_size)
+
+    if n_test >= n_samples:
+        raise ValueError("The requested split leaves no samples for training")
+
+    rng = np.random.default_rng(seed)
+    indices = rng.permutation(n_samples)
+
+    X_test = X[indices[:n_test]]
+    X_train = X[indices[n_test:]]
+    y_test = y[indices[:n_test]]
+    y_train = y[indices[n_test:]]
+
+    return X_train, X_test, y_train, y_test
